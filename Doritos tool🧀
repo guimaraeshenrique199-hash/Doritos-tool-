@@ -1,8 +1,8 @@
 
 --========================================================--
---              🎵🖼️ INTRO HENRIQUE 🖼️🎵
+--       🎵🖼️ INTRO HENRIQUE + 🌮 DORITOS VOADOR
 --                    Script 2026❗️
---                    🧱by henrique☢️
+--                 🧱by henrique☢️
 --========================================================--
 
 local Players = game:GetService("Players")
@@ -19,119 +19,81 @@ local backpack = player:WaitForChild("Backpack")
 -- CONFIGURAÇÕES
 --========================================================--
 
-local INTRO_MUSIC_ID = "rbxassetid://1839246711"
-local INTRO_IMAGE_ID = "rbxassetid://129676103296599"
-
 local ASSET_ID = 3420995096
 local DORITOS_IMAGE = "rbxassetid://74148139637300"
 
-local TOOL_NAME = "Doritos"
-local DANO_NO_NPC = 20
+local INTRO_MUSIC = "rbxassetid://1839246711"
+local INTRO_IMAGE = "rbxassetid://129676103296599"
+
+local DAMAGE = 20
 local SPEED = 40
 local RANGE = 50
 local COOLDOWN = 0.8
+local TOOL_NAME = "Doritos"
 
-local PROJECTILE_SIZE = Vector3.new(2.5, 2.5, 0.35)
-
-local MUSIC_IDS = {
+local HIT_SOUNDS = {
     "rbxassetid://130363373001396",
     "rbxassetid://122180189312589",
     "rbxassetid://121351852050830",
     "rbxassetid://133030775976421"
 }
 
-local equipped = false
 local busy = false
 local currentTool = nil
 local connections = {}
-local projectileConnections = {}
-local alive = true
-
---========================================================--
--- LIMPAR CONEXÕES COM SEGURANÇA
---========================================================--
-
-local function disconnectList(list)
-    for i = #list, 1, -1 do
-        local connection = list[i]
-
-        if connection then
-            pcall(function()
-                connection:Disconnect()
-            end)
-        end
-
-        list[i] = nil
-    end
-end
 
 --========================================================--
 -- INTRO HENRIQUE
 --========================================================--
 
 local function playIntro()
-    local oldGui = playerGui:FindFirstChild("HenriqueIntro")
-    if oldGui then
-        oldGui:Destroy()
-    end
+    local old = playerGui:FindFirstChild("HenriqueIntro")
+    if old then old:Destroy() end
 
     local gui = Instance.new("ScreenGui")
     gui.Name = "HenriqueIntro"
-    gui.ResetOnSpawn = false
     gui.IgnoreGuiInset = true
+    gui.ResetOnSpawn = false
     gui.Parent = playerGui
 
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Name = "ByHenrique"
-    textLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-    textLabel.Position = UDim2.new(0.5, 0, 0.42, 0)
-    textLabel.Size = UDim2.new(0.9, 0, 0, 90)
-    textLabel.BackgroundTransparency = 1
-    textLabel.Text = "(By henrique)"
-    textLabel.TextColor3 = Color3.new(1, 1, 1)
-    textLabel.Font = Enum.Font.SciFi
-    textLabel.TextScaled = true
-    textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-    textLabel.TextStrokeTransparency = 0.15
-    textLabel.ZIndex = 10
-    textLabel.Parent = gui
+    local title = Instance.new("TextLabel")
+    title.Name = "ByHenrique"
+    title.AnchorPoint = Vector2.new(0.5, 0.5)
+    title.Position = UDim2.new(0.5, 0, 0.42, 0)
+    title.Size = UDim2.new(0.9, 0, 0, 90)
+    title.BackgroundTransparency = 1
+    title.Text = "(By henrique)"
+    title.TextColor3 = Color3.new(1, 1, 1)
+    title.TextStrokeColor3 = Color3.new(0, 0, 0)
+    title.TextStrokeTransparency = 0.15
+    title.Font = Enum.Font.SciFi
+    title.TextScaled = true
+    title.ZIndex = 10
+    title.Parent = gui
 
-    local image = Instance.new("ImageLabel")
-    image.Name = "HenriqueImage"
-    image.AnchorPoint = Vector2.new(0.5, 0.5)
-    image.Position = UDim2.new(0.5, 0, 0.56, 0)
-    image.Size = UDim2.fromOffset(100, 100)
-    image.BackgroundTransparency = 1
-    image.Image = INTRO_IMAGE_ID
-    image.ScaleType = Enum.ScaleType.Fit
-    image.ZIndex = 10
-    image.Parent = gui
+    local picture = Instance.new("ImageLabel")
+    picture.Name = "HenriqueImage"
+    picture.AnchorPoint = Vector2.new(0.5, 0.5)
+    picture.Position = UDim2.new(0.5, 0, 0.56, 0)
+    picture.Size = UDim2.fromOffset(100, 100)
+    picture.BackgroundTransparency = 1
+    picture.Image = INTRO_IMAGE
+    picture.ScaleType = Enum.ScaleType.Fit
+    picture.ZIndex = 10
+    picture.Parent = gui
 
     local music = Instance.new("Sound")
     music.Name = "HenriqueIntroMusic"
-    music.SoundId = INTRO_MUSIC_ID
+    music.SoundId = INTRO_MUSIC
     music.Volume = 0.6
-    music.Looped = false
     music.Parent = SoundService
-
-    pcall(function()
-        music:Play()
-    end)
+    music:Play()
 
     task.wait(2.5)
 
-    if not gui.Parent then
-        music:Destroy()
-        return
-    end
-
-    local textTween = TweenService:Create(
-        textLabel,
-        TweenInfo.new(
-            2.5,
-            Enum.EasingStyle.Quint,
-            Enum.EasingDirection.Out
-        ),
+    local t1 = TweenService:Create(
+        title,
+        TweenInfo.new(2.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
         {
             Position = UDim2.new(0.5, 0, 0.42, -130),
             TextTransparency = 1,
@@ -139,13 +101,9 @@ local function playIntro()
         }
     )
 
-    local imageTween = TweenService:Create(
-        image,
-        TweenInfo.new(
-            2.5,
-            Enum.EasingStyle.Quint,
-            Enum.EasingDirection.InOut
-        ),
+    local t2 = TweenService:Create(
+        picture,
+        TweenInfo.new(2.5, Enum.EasingStyle.Quint, Enum.EasingDirection.InOut),
         {
             Size = UDim2.fromOffset(0, 0),
             ImageTransparency = 1,
@@ -153,93 +111,54 @@ local function playIntro()
         }
     )
 
-    textTween:Play()
-    imageTween:Play()
-    imageTween.Completed:Wait()
+    t1:Play()
+    t2:Play()
+    t2.Completed:Wait()
 
-    if gui.Parent then
-        gui:Destroy()
-    end
+    gui:Destroy()
 
     music.Ended:Connect(function()
-        if music.Parent then
-            music:Destroy()
-        end
+        if music.Parent then music:Destroy() end
     end)
 
     task.delay(30, function()
-        if music.Parent then
-            music:Destroy()
-        end
+        if music.Parent then music:Destroy() end
     end)
 end
 
 --========================================================--
--- VERIFICAR SE É PERSONAGEM DE JOGADOR
---========================================================--
-
-local function isPlayerCharacter(model)
-    for _, otherPlayer in ipairs(Players:GetPlayers()) do
-        if otherPlayer.Character == model then
-            return true
-        end
-    end
-
-    return false
-end
-
---========================================================--
--- LOCALIZAR TOOL
+-- CARREGAR TOOL
 --========================================================--
 
 local function findTool()
     local character = player.Character
 
-    if character then
-        local tool = character:FindFirstChild(TOOL_NAME)
-
-        if tool and tool:IsA("Tool") then
-            return tool
-        end
-    end
-
     local tool = backpack:FindFirstChild(TOOL_NAME)
+    if tool and tool:IsA("Tool") then return tool end
 
-    if tool and tool:IsA("Tool") then
-        return tool
+    if character then
+        tool = character:FindFirstChild(TOOL_NAME)
+        if tool and tool:IsA("Tool") then return tool end
     end
 
     return nil
 end
 
---========================================================--
--- CARREGAR DORITOS PELO ID
---========================================================--
-
-local function loadDoritos()
+local function loadTool()
     local existing = findTool()
-
-    if existing then
-        return existing
-    end
-
-    -- Verifica se o ambiente oferece GetObjects.
-    if typeof(game.GetObjects) ~= "function" then
-        warn("Doritos: GetObjects não está disponível neste ambiente.")
-        return nil
-    end
+    if existing then return existing end
 
     local ok, objects = pcall(function()
         return game:GetObjects("rbxassetid://" .. ASSET_ID)
     end)
 
     if not ok or not objects or not objects[1] then
-        warn("Doritos: falha ao carregar o asset " .. ASSET_ID)
+        warn("Doritos: não foi possível carregar o asset. Verifique o ID e as permissões.")
         return nil
     end
 
     local container = objects[1]
-    local tool = nil
+    local tool
 
     if container:IsA("Tool") then
         tool = container
@@ -253,6 +172,7 @@ local function loadDoritos()
         return nil
     end
 
+    -- Não executa manualmente os scripts internos do pacote.
     tool.Name = TOOL_NAME
     tool.Parent = backpack
 
@@ -264,14 +184,11 @@ local function loadDoritos()
 end
 
 --========================================================--
--- GUI MOBILE
+-- GUI DO DORITOS
 --========================================================--
 
-local oldGui = playerGui:FindFirstChild("DoritosVoador")
-
-if oldGui then
-    oldGui:Destroy()
-end
+local previousGui = playerGui:FindFirstChild("DoritosVoador")
+if previousGui then previousGui:Destroy() end
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "DoritosVoador"
@@ -295,54 +212,50 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(1, 0)
 corner.Parent = button
 
-local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(255, 220, 120)
-stroke.Thickness = 3
-stroke.Parent = button
+local outline = Instance.new("UIStroke")
+outline.Color = Color3.fromRGB(255, 220, 120)
+outline.Thickness = 3
+outline.Parent = button
 
 --========================================================--
--- MÚSICA ALEATÓRIA
+-- PERSONAGENS E NPCs
 --========================================================--
 
-local function playHitMusic()
+local function isPlayerCharacter(model)
+    for _, other in ipairs(Players:GetPlayers()) do
+        if other.Character == model then
+            return true
+        end
+    end
+    return false
+end
+
+--========================================================--
+-- SOM DE ACERTO
+--========================================================--
+
+local function playHitSound()
     local sound = Instance.new("Sound")
     sound.Name = "DoritosHitMusic"
-    sound.SoundId = MUSIC_IDS[math.random(1, #MUSIC_IDS)]
+    sound.SoundId = HIT_SOUNDS[math.random(1, #HIT_SOUNDS)]
     sound.Volume = 1
     sound.Parent = SoundService
-
-    sound.Ended:Connect(function()
-        if sound.Parent then
-            sound:Destroy()
-        end
-    end)
-
     sound:Play()
 
+    sound.Ended:Connect(function()
+        if sound.Parent then sound:Destroy() end
+    end)
+
     task.delay(30, function()
-        if sound.Parent then
-            sound:Destroy()
-        end
+        if sound.Parent then sound:Destroy() end
     end)
 end
 
 --========================================================--
--- CRIAR PROJÉTIL
+-- PROJÉTIL
 --========================================================--
 
 local function launchDoritos(origin, direction)
-    local hitbox = Instance.new("Part")
-    hitbox.Name = "DoritosHitbox"
-    hitbox.Size = PROJECTILE_SIZE
-    hitbox.Transparency = 1
-    hitbox.Anchored = true
-    hitbox.CanCollide = false
-    hitbox.CanTouch = false
-    hitbox.CanQuery = false
-    hitbox.CastShadow = false
-    hitbox.CFrame = CFrame.new(origin)
-    hitbox.Parent = Workspace
-
     local visual = Instance.new("Part")
     visual.Name = "DoritosVisual"
     visual.Size = Vector3.new(2.5, 2.5, 0.05)
@@ -355,12 +268,20 @@ local function launchDoritos(origin, direction)
     visual.CFrame = CFrame.new(origin)
     visual.Parent = Workspace
 
-    for _, face in ipairs({
-        Enum.NormalId.Front,
-        Enum.NormalId.Back
-    }) do
+    local hitbox = Instance.new("Part")
+    hitbox.Name = "DoritosHitbox"
+    hitbox.Size = Vector3.new(2.5, 2.5, 0.35)
+    hitbox.Transparency = 1
+    hitbox.Anchored = true
+    hitbox.CanCollide = false
+    hitbox.CanTouch = false
+    hitbox.CanQuery = false
+    hitbox.CastShadow = false
+    hitbox.CFrame = CFrame.new(origin)
+    hitbox.Parent = Workspace
+
+    for _, face in ipairs({Enum.NormalId.Front, Enum.NormalId.Back}) do
         local surface = Instance.new("SurfaceGui")
-        surface.Name = "DoritosSurface"
         surface.Face = face
         surface.AlwaysOnTop = true
         surface.LightInfluence = 0
@@ -369,7 +290,6 @@ local function launchDoritos(origin, direction)
         surface.Parent = visual
 
         local image = Instance.new("ImageLabel")
-        image.Name = "DoritosImage"
         image.Size = UDim2.fromScale(1, 1)
         image.BackgroundTransparency = 1
         image.Image = DORITOS_IMAGE
@@ -377,26 +297,21 @@ local function launchDoritos(origin, direction)
         image.Parent = surface
     end
 
+    local params = OverlapParams.new()
+    params.FilterType = Enum.RaycastFilterType.Exclude
+
+    local excluded = {visual, hitbox}
+    if player.Character then
+        excluded[#excluded + 1] = player.Character
+    end
+    params.FilterDescendantsInstances = excluded
+
     local elapsed = 0
     local finished = false
     local connection
 
-    local overlapParams = OverlapParams.new()
-    overlapParams.FilterType = Enum.RaycastFilterType.Exclude
-
-    local excluded = {hitbox, visual}
-
-    if player.Character then
-        excluded[#excluded + 1] = player.Character
-    end
-
-    overlapParams.FilterDescendantsInstances = excluded
-
     local function cleanup()
-        if finished then
-            return
-        end
-
+        if finished then return end
         finished = true
 
         if connection then
@@ -404,25 +319,20 @@ local function launchDoritos(origin, direction)
             connection = nil
         end
 
-        if hitbox.Parent then
-            hitbox:Destroy()
-        end
-
-        if visual.Parent then
-            visual:Destroy()
-        end
+        if visual.Parent then visual:Destroy() end
+        if hitbox.Parent then hitbox:Destroy() end
     end
 
     connection = RunService.RenderStepped:Connect(function(dt)
-        if finished or not hitbox.Parent or not visual.Parent then
+        if finished or not visual.Parent or not hitbox.Parent then
             cleanup()
             return
         end
 
         elapsed += dt
 
-        local traveled = math.min(elapsed * SPEED, RANGE)
-        local position = origin + direction * traveled
+        local distance = math.min(elapsed * SPEED, RANGE)
+        local position = origin + direction * distance
 
         local rotation = CFrame.Angles(
             elapsed * 7,
@@ -430,18 +340,15 @@ local function launchDoritos(origin, direction)
             elapsed * 9
         )
 
-        local cf = CFrame.lookAt(
-            position,
-            position + direction
-        ) * rotation
+        local cf = CFrame.lookAt(position, position + direction) * rotation
 
-        hitbox.CFrame = cf
         visual.CFrame = cf
+        hitbox.CFrame = cf
 
         local parts = Workspace:GetPartBoundsInBox(
             hitbox.CFrame,
             hitbox.Size,
-            overlapParams
+            params
         )
 
         for _, part in ipairs(parts) do
@@ -451,110 +358,94 @@ local function launchDoritos(origin, direction)
                 local humanoid = model:FindFirstChildOfClass("Humanoid")
 
                 if humanoid and humanoid.Health > 0 then
-                    -- Atenção: alteração local; o servidor precisa
-                    -- validar o dano para que seja confiável.
-                    humanoid.Health = math.max(
-                        0,
-                        humanoid.Health - DANO_NO_NPC
-                    )
+                    -- Dano local: o servidor deve validar o acerto
+                    -- para que o dano seja confiável em um jogo publicado.
+                    humanoid.Health = math.max(0, humanoid.Health - DAMAGE)
 
-                    playHitMusic()
+                    playHitSound()
                     cleanup()
                     return
                 end
             end
         end
 
-        if traveled >= RANGE then
+        if distance >= RANGE then
             cleanup()
         end
     end)
-
-    projectileConnections[#projectileConnections + 1] = {
-        Disconnect = function()
-            cleanup()
-        end
-    }
 end
 
 --========================================================--
--- ATUALIZAR EQUIPAMENTO
+-- EQUIPAMENTO
 --========================================================--
+
+local function disconnectConnections()
+    for _, connection in ipairs(connections) do
+        connection:Disconnect()
+    end
+    table.clear(connections)
+end
 
 local function updateEquipped()
     local character = player.Character
 
-    equipped = character ~= nil
+    local isEquipped = character ~= nil
         and currentTool ~= nil
         and currentTool.Parent == character
 
-    button.Visible = equipped
+    button.Visible = isEquipped
 end
 
 local function setupCharacter(character)
-    disconnectList(connections)
-
+    disconnectConnections()
     currentTool = nil
-    equipped = false
     button.Visible = false
 
-    local function watchTool(item)
-        if not item:IsA("Tool") or item.Name ~= TOOL_NAME then
-            return
+    local function watch(item)
+        if item:IsA("Tool") and item.Name == TOOL_NAME then
+            currentTool = item
+            updateEquipped()
         end
-
-        currentTool = item
-        updateEquipped()
     end
 
     for _, item in ipairs(backpack:GetChildren()) do
-        watchTool(item)
+        watch(item)
     end
 
     for _, item in ipairs(character:GetChildren()) do
-        watchTool(item)
+        watch(item)
     end
 
-    connections[#connections + 1] =
-        backpack.ChildAdded:Connect(watchTool)
+    connections[#connections + 1] = backpack.ChildAdded:Connect(watch)
+    connections[#connections + 1] = character.ChildAdded:Connect(watch)
 
-    connections[#connections + 1] =
-        character.ChildAdded:Connect(watchTool)
+    connections[#connections + 1] = character.ChildRemoved:Connect(function(item)
+        if item == currentTool then
+            currentTool = findTool()
+            updateEquipped()
+        end
+    end)
 
-    connections[#connections + 1] =
-        character.ChildRemoved:Connect(function(item)
-            if item == currentTool then
-                currentTool = findTool()
-                updateEquipped()
-            end
-        end)
-
-    connections[#connections + 1] =
-        backpack.ChildRemoved:Connect(function(item)
-            if item == currentTool then
-                currentTool = findTool()
-                updateEquipped()
-            end
-        end)
+    connections[#connections + 1] = backpack.ChildRemoved:Connect(function(item)
+        if item == currentTool then
+            currentTool = findTool()
+            updateEquipped()
+        end
+    end)
 end
 
 --========================================================--
--- BOTÃO DE LANÇAMENTO
+-- LANÇAR
 --========================================================--
 
 button.Activated:Connect(function()
-    if busy or not equipped then
-        return
-    end
+    if busy or not button.Visible then return end
 
     local character = player.Character
     local root = character and character:FindFirstChild("HumanoidRootPart")
     local camera = Workspace.CurrentCamera
 
-    if not root or not camera or not currentTool then
-        return
-    end
-
+    if not root or not camera or not currentTool then return end
     if currentTool.Parent ~= character then
         updateEquipped()
         return
@@ -568,7 +459,7 @@ button.Activated:Connect(function()
         {Size = UDim2.fromOffset(66, 66)}
     ):Play()
 
-    task.delay(0.1, function()
+    task.delay(0.12, function()
         if button.Parent then
             TweenService:Create(
                 button,
@@ -579,13 +470,9 @@ button.Activated:Connect(function()
     end)
 
     local viewport = camera.ViewportSize
-    local ray = camera:ViewportPointToRay(
-        viewport.X / 2,
-        viewport.Y / 2
-    )
+    local ray = camera:ViewportPointToRay(viewport.X / 2, viewport.Y / 2)
 
     local direction = ray.Direction.Unit
-
     local origin = root.Position
         + Vector3.new(0, 1.5, 0)
         + root.CFrame.LookVector * 3
@@ -603,7 +490,7 @@ end)
 --========================================================--
 
 playIntro()
-loadDoritos()
+loadTool()
 
 if player.Character then
     setupCharacter(player.Character)
@@ -611,17 +498,6 @@ end
 
 player.CharacterAdded:Connect(function(character)
     task.wait(0.5)
-
-    loadDoritos()
+    loadTool()
     setupCharacter(character)
-end)
-
-script.Destroying:Connect(function()
-    alive = false
-    disconnectList(connections)
-    disconnectList(projectileConnections)
-
-    if gui.Parent then
-        gui:Destroy()
-    end
 end)
