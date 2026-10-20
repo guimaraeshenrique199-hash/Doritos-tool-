@@ -1,9 +1,3 @@
-
---========================================================--
---          🌮 DORITOS VOADOR - Script 2026❗️
---                 🧱by henrique☢️
---========================================================--
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
